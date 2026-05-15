@@ -17,12 +17,24 @@ import vectorwing.farmersdelight.common.block.RichSoilBlock;
 
 @Mixin(RichSoilBlock.class)
 public class RichSoilBlockMixin {
-   @Inject(method = "randomTick", at = @At(value = "INVOKE", target = "Ljava/util/function/Supplier;get()Ljava/lang/Object;", ordinal = 2), cancellable = true)
-   private void onLanding(BlockState state, ServerWorld level, BlockPos pos, Random rand, CallbackInfo ci, @Local Block aboveBlock) {
-         if (aboveBlock == NSMiscBlocks.SHIITAKE_MUSHROOM) {
-            level.setBlockState(pos.up(), NaturesDelightBlocksAndItems.SHIITAKE_MUSHROOM_COLONY_BLOCK.getDefaultState());
-            ci.cancel();
-         }
-   }
+    @Inject(
+        method = "convertMushroomToColony",
+        at = @At("HEAD"),
+        cancellable = true
+    )
+    private void naturesdelight$convertShiitake(
+        BlockState targetState,
+        BlockPos targetPos,
+        ServerLevel level,
+        CallbackInfoReturnable<Boolean> cir
+    ) {
+        if (targetState.is(NSBlocks.SHIITAKE_MUSHROOM.get())) {
+            level.setBlockAndUpdate(
+                targetPos,
+                NaturesDelightBlocksAndItems.SHIITAKE_MUSHROOM_COLONY_BLOCK.get().defaultBlockState()
+            );
+            cir.setReturnValue(true);
+        }
+    }
 
 }
